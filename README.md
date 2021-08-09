@@ -7,7 +7,7 @@ Libraries used:
 * Paramiko 
 * GuiZERO
 
-# H5 For testing use a VM (with Ubuntu, Mint, etc.), but with a "Bridged Adapter". On your VM go to your OS (in my case Ubuntu):
+# For testing use a VM (with Ubuntu, Mint, etc.), but with a "Bridged Adapter". On your VM go to your OS (in my case Ubuntu):
 1. Go to **Settings** -> **Network**
 2. Choose *Adapter 1*
 3. Check *"Enable Network Adapter"*
