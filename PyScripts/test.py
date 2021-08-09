@@ -38,5 +38,34 @@ def interactiveSSHShell():
         client.close()
     except Exception as err:
         print(str(err))
-interactiveSSHShell()
-#test1()
+#interactiveSSHShell()
+from pathlib import Path
+
+current_dir = os.path.basename(os.getcwd())
+print(current_dir)
+current_dir = os.path.split(os.getcwd())
+print(current_dir)
+current_dir = os.path.dirname(os.getcwd())
+print(current_dir)
+
+
+curr_path = Path.cwd()
+
+#curr_path = curr_path.parent
+print(curr_path)
+print(list(curr_path.parents))
+
+target_ip = '192.168.1.119'
+target_user = 'tom'
+target_port = 22
+def open_folder():
+    session = paramiko.SSHClient()
+    curr_path = Path.cwd()
+    curr_path = curr_path.parent
+    session.load_host_keys('C:/Users/rette/source/repos/FT_master-slave/Keys')
+    session.connect(hostname=target_ip, username=target_user, password="161198")
+    stdin, stdout, stderr = session.exec_command('hostname')
+    print(stdout.read().decode())
+    session.close()
+
+open_folder()

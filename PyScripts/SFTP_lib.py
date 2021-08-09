@@ -21,13 +21,7 @@ def ping_ssh():
     else:
         print('Connection alive!')
 
-def youtube():
-    session = paramiko.SSHClient()
-    session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    session.connect(hostname=target_ip, username=target_user, password="161198")
-    stdin, stdout, stderr = session.exec_command('hostname')
-    print(stdout.read().decode())
-    session.close()
+
 
 def __ssh_connect(host, p, usr): #Add functionality to choose key locations
     try:
@@ -64,4 +58,3 @@ def transfer_file_window():
     subprocess.call(make_dir, shell=True)
     subprocess.call(connect, shell=True) 
     
-youtube()
