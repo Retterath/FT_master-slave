@@ -1,8 +1,8 @@
 import os, paramiko, subprocess
 
-target_ip = '151.237.63.205'
-target_user = 'alex'
-target_port = 1364
+target_ip = '192.168.1.119'
+target_user = 'tom'
+target_port = 22
 
 def ping_alex(hostname):
     response = os.system('ping -c 1 ' + hostname) #UPDATE

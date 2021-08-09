@@ -16,26 +16,6 @@ def main():
         input_box = TextBox(box_ping, grid=[10,0])
     def __ping(inputBox):
         SFTP_lib.ping_alex(inputBox.value)
-            
-#     def display_transfer_file():
-#         box_transfer = Box(app, width=300, height=200, border=1, grid=[500,300],layout='grid')
-#         #client
-#         client_file = Text(box_transfer, text="Client file",grid=[600,500])
-#         PushButton(app,command=lambda: __transferFileWindow(text_clientFile),text="Open explorer",grid=[610,500])
-#         
-#         text_clientFile = TextBox(box_transfer,text="", grid=[600,490])
-#         #server
-#         server_file = Text(box_transfer, text="Server file", grid=[600,450])
-#         text_serverFile = TextBox(box_transfer, grid=[600,440])
-#         #file
-#         file_name = Text(box_transfer, text="File name", grid=[600,400])
-#         text_server_fileName = TextBox(box_transfer, grid=[600,390])
-#         
-#         transfer_button = PushButton(app, command=__transfer_file,
-#                                              args=[text_clientFile, text_serverFile,text_server_fileName],
-#                                              text="Transfer", grid=[600,300])
-#         PushButton(app,command=lambda: __transferFileWindow(text_clientFile),text="Open explorer",grid=[200,450])
-#       
     def display_transfer_file():
         #width=800, height=600
         
