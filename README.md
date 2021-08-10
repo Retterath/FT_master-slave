@@ -15,3 +15,11 @@ Libraries used:
 This will make the VM use the same network as the host. 
 > If you use bridged networking, the virtual machine is a full participant in the network. It has access to other machines on 
 > the network and can be contacted by other machines on the network as if it were a physical computer on the network.
+
+# Arduino sensor - connection schematic
+![Connection schematic](Resources/arduino_schematic.png "title")
+USB connection needs to be hooked up to the interpreter's PC, in order to allow serial transfer.
+
+Buzzer is optional, but is useful for error signaling. 
+
+Contrast may also be hooked up directly to a resistor, but not recommended - if too low load is connected, it may burn the LCD. Reference your LCD manual for more details.

@@ -3,18 +3,17 @@ import time
 import os
 import sys
 
-print('###################################################################')
-print('#################### FT Arduino Sensor Daemon #####################')
-print('###################################################################')
+print('#########################################################################')
+print('#################### FT Arduino Sensor Interpreter ######################')
+print('#########################################################################')
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 3:
     print('[!] Unsufficient arguments!')
-    print('Usage: ./arduino_daemon.py [communication port] [baud rate] [timeout]')
+    print('Usage: ./arduino_daemon.py [communication port] [baud rate]')
     sys.exit()
 
 comm_port = sys.argv[1]
 baud_rate = int(sys.argv[2])
-in_timeout = float(sys.argv[3])
 
 print('[#] Trying to listen on port ' + comm_port)
 
@@ -22,7 +21,7 @@ ser = None
 
 while ser is None:
     try:
-        ser = serial.Serial(comm_port, baud_rate, timeout=in_timeout)
+        ser = serial.Serial(comm_port, baud_rate, timeout=None)
     except:
         print('[!] No connection found, retrying...')
 
@@ -45,7 +44,7 @@ while ser.isOpen():
 
     while slave_input != b'DM_END':
         print(str(hex(mem_block)) + ': ' + str(slave_input))
-        ser.write(b"DM_RCV")
+        #ser.write(b"DM_RCV")
         slave_input = ser.readline()
         mem_block += 1
     print('[#] Dumping complete, closing Serial connection...')
