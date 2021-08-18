@@ -1,7 +1,8 @@
 from guizero import *
 from tkinter import filedialog
 from pathlib import Path
-import paramiko, time
+from io import StringIO
+import paramiko, time, subprocess
 
 target_ip = '192.168.1.119'
 target_user = 'tom'
@@ -53,31 +54,54 @@ def use_key(key): #paramiko cannot parse .ppk files.
         print("Connected to server")
     #except paramiko.AuthenticationException: print("Authentication failed, check password.")
         
-use_key("C:/Users/rette/.ssh/id_rsa") #private key
+#use_key("C:/Users/rette/.ssh/id_rsa") #private key
+def generate_RSA_KEY(target_ip, key_path):
+    filename = './Keys/RSA'
+    key_path = 'C:\\Users\\rette\\.ssh\\id_rsa.pub'
+    key_path_private = 'C:/Users/rette/.ssh/id_rsa'
+    open('./Keys/RSA','a').close()
+    
+    f = open(key_path_private, 'r')
+    s = f.read()
+    keyfile = StringIO(s)
+    f.close()
+    
+    pkey = paramiko.RSAKey.from_private_key(keyfile)
+    pkey.write_private_key_file('./Keys/RSA')
+    
+    return pkey
+    #host = paramiko.HostKeys('./Keys/RSA')
+    #host.add(hostname=target_ip, keytype="ssh-rsa",key=pkey)
+    #host.save(str('./Keys/RSA'))
+    
 
-def use_keys(): #Add way for paramiko to create the file itself HERE inside the project
+def connect(): 
     session = paramiko.SSHClient()
-    curr_path = Path.cwd()
-    curr_path = curr_path.parent
-    #session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    session.load_host_keys('./Keys/known_hosts')
-    #session.set_missing_host_key_policy(paramiko.RejectPolicy())
-    #session.set_missing_host_key_policy(paramiko.WarningPolicy())
-    session.connect(hostname=target_ip, username=target_user, password="161198")
-    commands = ['ls /', 'echo $USER', 'hostname', 'sdfgh']
-    for command in commands:
-        print(f"{'#'*10} Executing the command: {command} {'#'*10}")
-        stdin, stdout, stderr = session.exec_command(command)
-        
-        time.sleep(.5)
-        print(stdout.read().decode())
-        err = stderr.read().decode()
-        if err:
-            print(err)
+    #session.load_host_keys('./Keys/known_host') #dont name it that way
+    #TODO: Fix load_host_keys part
+    pkey = generate_RSA_KEY(target_ip, 'd')
+    session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    session.connect(target_ip, username=target_user, pkey=pkey)
+    
+    stdin, stdout, stderr = session.exec_command('uptime')
+    print(stdout.read().decode())  
+       
     session.close()
+connect()   
+generate_RSA_KEY(target_ip, "C:/Users/rette/.ssh/id_rsa")
+        
 
 #RSA: static generate()
-def add_keys_windows(): # %USERPROFILE%\.ssh\id_rsa.pub | ssh tom@192.168.1.119 "cat >> .ssh/authorized_keys"
+'''
+If the shell is invoked explicitly, via shell=True, it is the application’s responsibility to ensure that 
+all whitespace and metacharacters are quoted appropriately to avoid shell injection vulnerabilities.
+'''
+def add_keys_windows(pkey_path, target_user, target_pass): 
+    #authorized_keysclear ???
+# type %USERPROFILE%\.ssh\id_rsa.pub | ssh tom@192.168.1.119 "cat >> .ssh/authorized_keys"
+#subprocess.run('"C:/Users/rette/.ssh/id_rsa.pub | ssh tom@192.168.1.119 cat >> .ssh/authorized_keys"',shell=True)
+    command = f"type {pkey_path} | ssh {target_user}@192.168.1.119 'cat >> .ssh/authorized_keys'"
     return 1
 def add_keys_linux(): #ssh-copy-id -i ~/.ssh/id_rsa.pub tom@192.168.1.119 -p 22
     #TODO: extend functionality to send the key to remote machine
@@ -88,4 +112,5 @@ def add_keys_linux(): #ssh-copy-id -i ~/.ssh/id_rsa.pub tom@192.168.1.119 -p 22
                         allow_agent=False, look_for_keys=False)
 
     session.close()
+
 
