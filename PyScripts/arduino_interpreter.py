@@ -2,6 +2,7 @@ import serial
 import time
 import os
 import sys
+import json
 
 print('#########################################################################')
 print('#################### FT Arduino Sensor Interpreter ######################')
@@ -18,6 +19,7 @@ baud_rate = int(sys.argv[2])
 print('[#] Trying to listen on port ' + comm_port)
 
 ser = None
+cached_results = {}
 
 while ser is None:
     try:
@@ -43,10 +45,19 @@ while ser.isOpen():
     mem_block = 1
 
     while slave_input != b'DM_END\r\n':
-        print(str(hex(mem_block)) + ': ' + str(slave_input))
+        curr_input = str(slave_input)[0:len(str(slave_input)) - 2]
+        curr_addr = str(hex(mem_block))
+
+        print(curr_addr + ': ' + curr_input)
+        cached_results[curr_addr] = curr_input
+
         #ser.write(b"DM_RCV")
         slave_input = ser.readline()
         mem_block += 1
-    print('[#] Dumping complete, closing Serial connection...')
 
-    ser.close()
+    json_results = json.dumps(cached_results, indent = 4)
+
+    # Some method for sending the JSON to the daemon...
+
+    print('[#] Dumping complete, awaiting for new transfer...')
+
