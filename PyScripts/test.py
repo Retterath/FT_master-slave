@@ -31,31 +31,27 @@ def interactiveSSHShell():
 def select_keys(path):
     #TODO: open folder and return the file
     return 1
-def use_key(key): #paramiko cannot parse .ppk files.
-    #try:
-        #TODO: Uses hosts. not keys. Change
-        print("Establishing ssh connection")
-        client = paramiko.SSHClient()
+def generate_known_hosts():
+    #Windows uses \ while Mac and Linux use / as a separator
+    if not Path('Keys','known_hosts').exists():
+        try:
+            Path('Keys').mkdir(parents=True, exist_ok=True)
+            Path('Keys','known_hosts').touch(exist_ok=True)
+            path = Path('Keys','known_hosts')        
+        except FileExistsError: print("known_hosts already exists.")
 
-        client.load_system_host_keys()
-        key_file = paramiko.RSAKey().from_private_key_file(key) 
-        '''
-        The key is yet not added in the remote machine. Use add_keys_linux() to continue
-        '''
-        client.connect(hostname=target_ip, port=target_port, username=target_user, 
-                        allow_agent=False,look_for_keys=False, pkey=key_file)
+generate_known_hosts()
+def use_known_hosts():
+    generate_known_hosts()
+    if Path('Keys','known_hosts').exists():
+        print("The file is created")
         
-        client.load_host_keys(filename=key)
-        client.save_host_keys('./Keys/ft_known_hosts')
-        #private_key = paramiko.RSAKey.from_private_key_file(filename=pkey)
+    else: print("The file is missing")
         
-        command = client.exec_command("hostname")
-        print(command.read().decode())
-        print("Connected to server")
-    #except paramiko.AuthenticationException: print("Authentication failed, check password.")
         
+use_known_hosts() 
 #use_key("C:/Users/rette/.ssh/id_rsa") #private key
-def generate_RSA_KEY(target_ip, key_path):
+def generate_RSA_KEY(target_ip, key_path): #TODO: Add pathlib.Path functionality
     filename = './Keys/RSA'
     key_path = 'C:\\Users\\rette\\.ssh\\id_rsa.pub'
     key_path_private = 'C:/Users/rette/.ssh/id_rsa'
@@ -70,9 +66,6 @@ def generate_RSA_KEY(target_ip, key_path):
     pkey.write_private_key_file('./Keys/RSA')
     
     return pkey
-    #host = paramiko.HostKeys('./Keys/RSA')
-    #host.add(hostname=target_ip, keytype="ssh-rsa",key=pkey)
-    #host.save(str('./Keys/RSA'))
     
 
 def connect(): 
@@ -85,7 +78,7 @@ def connect():
     session.connect(target_ip, username=target_user, pkey=pkey)
     
     stdin, stdout, stderr = session.exec_command('uptime')
-    print(stdout.read().decode())  
+    print(stdout.read().decode())
        
     session.close()
 connect()   
