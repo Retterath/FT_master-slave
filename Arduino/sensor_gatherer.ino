@@ -36,19 +36,21 @@ int interruptsToPassBeforeWriting = 12; // 180
 // ############################################################
 // States variables that are manipulated in interrupts.
 // # IsLCDPressed (buttonLCDPressed()) - when button for LCD is pressed by user
-// # IsSerialPressed - set to true once the ISR for writing to EEPROM finishes; initializes the ISR for serial transfer to host PC
+// # IsSerialPressed - set to true once the ISR for writing to memory finishes; initializes the ISR for serial transfer to host PC
 // # ShouldRead (readSensors()) - called as a timer interrupt when sampleTimeout seconds pass
+// # ShouldFlush (clearMemory()) - set to true once memory fills up; cleared after sending it over to the host PC
 // # ScreenState - dictates current state of LCD dispay. 4 valid states are defined:
 //                 # State 0 - Shows current light readings
 //                 # State 1 - Shows current humidity readings
 //                 # State 2 - Shows current temperature readings
-//                 # State 3 - Shows the most recently written sensor values into the EEPROM
+//                 # State 3 - Shows the most recently written sensor values into the memory
 //                 # State -1 - Displayed when error is detected during sensor readings
-// # SensorInterruptsCount (readSensors()) - counts each time sensors are being read; used for writing to EEPROM
+// # SensorInterruptsCount (readSensors()) - counts each time sensors are being read; used for writing to memory
 // ############################################################
 volatile bool IsLCDPressed = false;
 volatile bool IsSerialPressed = false;
 volatile bool ShouldRead = false;
+volatile bool ShouldFlush = false;
 volatile int ScreenState = 0;
 volatile int MemAddr = 0;
 
@@ -57,8 +59,7 @@ volatile int lightVal;
 volatile byte SensorInterruptsCount = 0;
 
 // ############################################################
-// Cache of the internal EEPROM memory, loaded on startup;
-// Used in order to reduce EEPROM load.
+// Internal memory, loaded on startup;
 // ############################################################
 volatile byte* eepromCache = NULL;
 
@@ -79,7 +80,7 @@ void setup() {
   pinMode(beepPin, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  memorySetup();
+  eepromCache = new byte[1024];
 
   attachInterrupt(digitalPinToInterrupt(buttonLCDPin), buttonLCDPressed, FALLING); 
 
@@ -129,31 +130,28 @@ void loop() {
 
   if (SensorInterruptsCount >= interruptsToPassBeforeWriting) {
     // ############################################################
-    // Interrupt Service Routine for writing sensor data to EEPROM; Timer interrupted - conditionally from readSensors()
+    // Interrupt Service Routine for writing sensor data to memory; Timer interrupted - conditionally from readSensors()
     // Once data is written, initiate transfer with host PC.
     // ############################################################
     digitalWrite(LED_BUILTIN, HIGH);
     noInterrupts();
   
     eepromCache[MemAddr] = lightVal;
-    EEPROM.write(MemAddr, lightVal);
     MemAddr++;
     if (MemAddr > 1023) {
-     memoryLock();
+      ShouldFlush = true;
     }
 
     eepromCache[MemAddr] = temperature;
-    EEPROM.write(MemAddr, temperature);
     MemAddr++;
     if (MemAddr > 1023) {
-      memoryLock();
+       ShouldFlush = true;
     }
 
     eepromCache[MemAddr] = humidity;
-    EEPROM.write(MemAddr, humidity);
     MemAddr++;
     if (MemAddr > 1023) {
-      memoryLock();
+       ShouldFlush = true;
     }
 
     SensorInterruptsCount = 0;
@@ -213,48 +211,21 @@ void readSensors() {
   SensorInterruptsCount++;
 }
 
-void memorySetup() { 
-    // ############################################################
-    // Sets up EEPROM memory to use.
-    // ############################################################
-  noInterrupts();
-  
-  // Check value at address 0x00 for a specific checksum.
-  if (EEPROM.read(0) != 165) {
-    lcd.setCursor(0,0);
-    lcd.print("Memory checksum");
-    lcd.setCursor(0,1);
-    lcd.print("fail !");
-    while(1) { }
-  }
-
+void clearMemory() {
+  // ############################################################
+  // Resets internal memory.
+  // ############################################################
+  delete eepromCache;
   eepromCache = new byte[1024];
-
-  bool memoryFull = true;
-
-  // Find the first free memory address.
-  for (MemAddr = 1; MemAddr < 1024; MemAddr++) {
-    byte readVal = EEPROM.read(MemAddr);
-    if (readVal == 255) {
-      memoryFull = false;
-      break;
-    }
-    eepromCache[MemAddr] = readVal;
-  }
-
-  if (memoryFull) {
-      memoryLock();
-  }
-
-  interrupts();
 }
 
 int startSerialTransfer() {
     // ############################################################
     // Starts serial communication with host PC. Communication procedure:
     // 1. Start communication channel and waits host to send ACK message. If no confirmation - fail.
-    // 2. Starts dumping written sensor values in EEPROM to Serial
-    // 3. After iterating all values in eeprom - send DM_END and terminate
+    // 2. Starts dumping written sensor values in memory to Serial
+    // 3. After iterating all values in memory - send DM_END and terminate
+    // 4. If memory is filled up; call clearMemory() to refresh it.
     // RETURNS: 0 - successful transfer, -1 - no host listener, -2 - no confirmation received
     // ############################################################
     Serial.begin(14400);
@@ -280,17 +251,12 @@ int startSerialTransfer() {
 
     Serial.print("DM_END");
     Serial.end();
-    return 0;
-}
 
-void memoryLock() {
-    // ############################################################
-    // Called when EEPROM memory is full; locks the microcontroller.
-    // ############################################################
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Memory full!");
-    while(1) { digitalWrite(beepPin, HIGH); }
+    if (ShouldFlush) {
+      clearMemory();
+    }
+
+    return 0;
 }
 
 void printLastSaved() {
