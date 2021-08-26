@@ -45,16 +45,23 @@ def use_known_hosts():
         print("The file is created")
         
     else: print("The file is missing")
-        
-def generate_RSA_KEY(target_ip, key_path): #TODO: Add pathlib.Path functionality
+       
+def generate_RSA_KEY(target_ip, key_path):
     filename = Path('Keys','known_hosts').stem
-    key_path = 'C:\\Users\\rette\\.ssh\\id_rsa.pub'
-    key_path_private = 'C:/Users/rette/.ssh/id_rsa'
+    ssh_dir = Path.home() / '.ssh'
+
+    if key_path is None:
+        for curr_file_path in ssh_dir.iterdir():
+            if curr_file_path.name == 'id_rsa': #Returns private key file
+                key_path = curr_file_path
+        if key_path is None:
+            print("Private ssh-key not found. Please select valid key path or create a new key.")
+            return 1
+    key_path_private = key_path
+
     open('./Keys/RSA','a').close()
-    
     f = open(key_path_private, 'r')
-    s = f.read()
-    keyfile = StringIO(s)
+    keyfile = StringIO(f.read())
     f.close()
     
     pkey = paramiko.RSAKey.from_private_key(keyfile)
@@ -62,7 +69,7 @@ def generate_RSA_KEY(target_ip, key_path): #TODO: Add pathlib.Path functionality
     
     return pkey 
 
-
+generate_RSA_KEY(target_ip, None)
 
 def connect(target_ip):
     host_keys_path = Path('Keys','known_hosts')
