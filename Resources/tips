@@ -1,0 +1,2 @@
+_ means the name is to be treated like private
+__ "dunder" means the name is class-specific. Access them from the class itself

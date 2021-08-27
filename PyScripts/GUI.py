@@ -1,4 +1,4 @@
-import SFTP_lib
+import PyScripts.handshake as hsh
 from guizero import *
 from tkinter import filedialog
 #Convention:
@@ -15,7 +15,7 @@ def main():
         PushButton(box_ping,command=lambda: __ping(input_box),text="Ping",grid=[0,0])
         input_box = TextBox(box_ping, grid=[10,0])
     def __ping(inputBox):
-        SFTP_lib.ping_alex(inputBox.value)
+        hsh.pinhshx(inputBox.value)
     def display_transfer_file():
         #width=800, height=600
         
@@ -38,13 +38,13 @@ def main():
         
     
     def __transfer_file(clientFile, serverFile):
-        SFTP_lib.transfer_file(clientFile.value, serverFile.value)
+        hsh.trahsh_file(clientFile.value, serverFile.value)
     
     def __transferFileWindow():
         
         file_name = filedialog.askopenfilename(initialdir = "/",title = "Select a File")
         #textBox.value = file_name
-        SFTP_lib.transfer_file_window()
+        hsh.trahsh_file_window()
     
         
     display_transfer_file()

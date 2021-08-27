@@ -31,77 +31,7 @@ def interactiveSSHShell():
 def select_keys(path):
     #TODO: open folder and return the file
     return 1
-def generate_known_hosts():
-    #Windows uses \ while Mac and Linux use / as a separator
-    if not Path('Keys','known_hosts').exists():
-        try:
-            Path('Keys').mkdir(parents=True, exist_ok=True)
-            Path('Keys','known_hosts').touch(exist_ok=True)    
-        except FileExistsError: print("known_hosts already exists.")
 
-def use_known_hosts():
-    generate_known_hosts()
-    if Path('Keys','known_hosts').exists():
-        print("The file is created")
-        
-    else: print("The file is missing")
-       
-def generate_RSA_KEY(target_ip, key_path):
-    filename = Path('Keys','known_hosts').stem
-    ssh_dir = Path.home() / '.ssh'
-
-    if key_path is None:
-        for curr_file_path in ssh_dir.iterdir():
-            if curr_file_path.name == 'id_rsa': #Returns private key file
-                key_path = curr_file_path
-        if key_path is None:
-            print("Private ssh-key not found. Please select valid key path or create a new key.")
-            return 1
-    key_path_private = key_path
-
-    open('./Keys/RSA','a').close()
-    f = open(key_path_private, 'r')
-    keyfile = StringIO(f.read())
-    f.close()
-    
-    pkey = paramiko.RSAKey.from_private_key(keyfile)
-    pkey.write_private_key_file('./Keys/RSA')
-    
-    return pkey 
-
-generate_RSA_KEY(target_ip, None)
-
-def connect(target_ip):
-    host_keys_path = Path('Keys','known_hosts')
-    session = paramiko.SSHClient()
-    try:
-        host_keys = paramiko.HostKeys(host_keys_path)
-    except: 
-        print("Corrupted host_keys file.")
-        return 0 #Add method for fixing corrupted host keys
-        
-    pkey = generate_RSA_KEY(target_ip, 'd')
-    session.load_host_keys(host_keys_path)
-    if host_keys.lookup(target_ip) is None:
-        session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    
-    else:
-        session.set_missing_host_key_policy(paramiko.RejectPolicy())
-    
-    session.connect(target_ip, username=target_user, pkey=pkey)
-    session.save_host_keys(host_keys_path) 
-    
-    
-    stdin, stdout, stderr = session.exec_command('uptime')
-    print(stdout.read().decode())
-       
-    session.close()
-connect(target_ip)   
-generate_RSA_KEY(target_ip, "C:/Users/rette/.ssh/id_rsa")
-
-#use_key("C:/Users/rette/.ssh/id_rsa") #private key
-
-         
 
 #RSA: static generate()
 '''
