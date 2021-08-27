@@ -9,8 +9,6 @@
 
 #include <LiquidCrystal.h>
 
-#include <EEPROM.h>
-
 
 // ############################################################
 // Initialize pins to be used.
