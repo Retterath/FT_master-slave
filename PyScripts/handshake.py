@@ -85,6 +85,7 @@ def __generate_known_hosts():
 
 def __generate_RSA_KEY(target_ip, key_path):
     ssh_dir = Path.home() / '.ssh'
+    rsa_dir = Path('Keys','RSA')
 
     if key_path is None:
         for curr_file_path in ssh_dir.iterdir():
@@ -93,20 +94,20 @@ def __generate_RSA_KEY(target_ip, key_path):
         if key_path is None:
             print("Private ssh-key not found. Please select valid key path or create a new key.")
             return 1
-    key_path_private = key_path
+    pkey_path = key_path
 
-    if not Path('Keys','RSA').exists():
+    if not rsa_dir.exists():
         try:
             Path('Keys').mkdir(parents=True, exist_ok=True)
-            Path('Keys','RSA').touch(exist_ok=True)
+            rsa_dir.touch(exist_ok=True)
         except FileExistsError: print("RSA already exists.")    
 
-    f = open(key_path_private, 'r')
+    f = open(pkey_path, 'r')
     keyfile = StringIO(f.read())
     f.close()
     
     pkey = paramiko.RSAKey.from_private_key(keyfile)
-    pkey.write_private_key_file('./Keys/RSA')
+    pkey.write_private_key_file(rsa_dir)
     
     return pkey 
 __generate_RSA_KEY(target_ip, None)

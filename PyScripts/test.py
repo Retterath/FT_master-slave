@@ -1,5 +1,5 @@
 from guizero import *
-from tkinter import filedialog
+import tkinter as tk
 from pathlib import Path
 from io import StringIO
 import paramiko, time, subprocess
@@ -28,10 +28,6 @@ def interactiveSSHShell():
         print(str(err))
 #interactiveSSHShell()
 
-def select_keys(path):
-    #TODO: open folder and return the file
-    return 1
-
 
 #RSA: static generate()
 '''
@@ -54,4 +50,35 @@ def add_keys_linux(): #ssh-copy-id -i ~/.ssh/id_rsa.pub tom@192.168.1.119 -p 22
 
     session.close()
 
+LARGE_FONT = ("Verdana", 12)
+class tk_test(tk.Tk):
+    #Runs on initialisation (load stuff)
+    def __init__(self, *args, **kwargs): 
+        #args: pass as much crap as you want (passing through values)
+        #kwargs: key-word-arguments (passing through dictionaries)
+        tk.Tk.__init__(self, *args, **kwargs)
+        container = tk.Frame(self) #border of the window
+        container.pack(side='top', fill='both', expand=True)
+        
+        container.grid_rowconfigure(0,weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
+        self.frames = {}
+        frame = StartPage(container,self)
+        self.frames[StartPage] = frame
+
+        frame.grid(row=0,column=0, sticky="nsew ")
+        self.show_frame(StartPage)
+
+    def show_frame(self, cont):
+        frame = self.frames[cont] #key
+        frame.tkraise()
+
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, master=parent)
+        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+app = tk_test()
+app.mainloop()

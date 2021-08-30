@@ -1,6 +1,7 @@
-import PyScripts.handshake as hsh
+import handshake as hsh
+import tkinter as tk
 from guizero import *
-from tkinter import filedialog
+
 #Convention:
 #display_NAME: for initializing the objects
 #__NAME: to connect object values to the lib
@@ -46,9 +47,13 @@ def main():
         #textBox.value = file_name
         hsh.trahsh_file_window()
     
-        
-    display_transfer_file()
-    display_ping()
+    
+    #I will try and use Tkinter here
+    def ssh_select(): #Choose whether password or private-key should be used
+
+        txtbox_passwd = TextBox(app)
+        btn_pkey = PushButton(app, text="Use key")
+    ssh_select()
     app.display()
 
 main()
