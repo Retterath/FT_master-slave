@@ -63,22 +63,59 @@ class tk_test(tk.Tk):
         container.grid_rowconfigure(0,weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+        #frames are like sections to seperate widgets on the screen
         self.frames = {}
-        frame = StartPage(container,self)
-        self.frames[StartPage] = frame
 
-        frame.grid(row=0,column=0, sticky="nsew ")
+        for F in (StartPage,PageOne,PageTwo):
+            frame = F(container,self)
+            self.frames[F] = frame
+            frame.grid(row=0,column=0, sticky="nsew ")
+
         self.show_frame(StartPage)
 
     def show_frame(self, cont):
         frame = self.frames[cont] #key
         frame.tkraise()
-
+def qf(stringtoprint):
+    print(stringtoprint)
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, master=parent)
-        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
+        label = tk.Label(self, text="Start Page", font=LARGE_FONT) 
+        label.pack(pady=10, padx=10) #Padding outside frame
+
+        button1 = tk.Button(self, text="Use password",
+                            #command=lambda: qf("This gets printed after")
+                            command = lambda: controller.show_frame(PageOne))
+        button1.pack()
+        button2 = tk.Button(self, text="Use key",
+                            #command=lambda: qf("This gets printed after")
+                            command = lambda: controller.show_frame(PageTwo))
+        button2.pack()
+class PageOne(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page one", font=LARGE_FONT) 
+        label.pack(pady=10, padx=10) #Padding outside label
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command = lambda: controller.show_frame(StartPage))
+        button1.pack()
+        button2 = tk.Button(self, text="Page two",
+                            command=lambda: controller.show_frame(PageOne))
+
+class PageTwo(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page two", font=LARGE_FONT) 
+        label.pack(pady=10, padx=10) #Padding outside label
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command = lambda: controller.show_frame(StartPage))
+        button1.pack()
+        button2 = tk.Button(self, text="Page one",
+                            command = lambda: controller.show_frame(PageOne))
+        button2.pack()
 
 app = tk_test()
 app.mainloop()
