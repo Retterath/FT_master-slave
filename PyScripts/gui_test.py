@@ -1,5 +1,5 @@
 from guizero import *
-from tkinter import Grid, ttk #Like the CSS for tkinter
+from tkinter import ttk #Like the CSS for tkinter
 import tkinter as tk
 
 '''
@@ -40,8 +40,6 @@ class tk_main(tk.Tk):
         main_frame = tk.Frame(self, background="cyan", relief=tk.RAISED, borderwidth=5)
         
         #Make the window sticky for every case
-        main_frame.grid_columnconfigure(0,weight=1) 
-        main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid(row=0, column=0)
 
         menubar = tk.Menu(main_frame)
@@ -64,12 +62,6 @@ class tk_main(tk.Tk):
         self.show_frame(StartPage)
 
 
-        label_a = tk.Label(master=main_frame, text="Im in frame main_frame")
-        label_a.grid(row=2, column=2)
-        label_b = tk.Label(master=main_frame, text="Im in frame main_frame too")
-        label_b.grid(row=2, column=3)
-
-
     def show_frame(self, cont):
         frame = self.frames[cont] #key
         frame.tkraise()
@@ -78,18 +70,64 @@ class tk_main(tk.Tk):
 # Pages #
 #########
 class StartPage(tk.Frame):
+    hidden = False
+    
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, master=parent)
-        
-        label = tk.Label(self, text="Start Page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5) 
-        label.pack(pady=10, padx=10) #Padding outside frame
+        tk.Frame.__init__(self, master=parent)        
+        #widgets
+        lbl_main = ttk.Label(self, text="Main Page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5)
+        ssh_frame = ttk.LabelFrame(self, text="SSH connect")
 
-        button1 = ttk.Button(self, text="Use password",
-                            command = lambda: controller.show_frame(PageOne))
-        button1.pack()
-        button2 = ttk.Button(self, text="Use key",
-                            command = lambda: controller.show_frame(PageTwo))
-        button2.pack()
+        ent_pass = ttk.Entry(ssh_frame, show='*')
+        lbl_pass = ttk.Label(ssh_frame, text="Password:")
+        lbl_ip = ttk.Label(ssh_frame, text="IP Address:")
+        ent_ip = ttk.Entry(ssh_frame)
+        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, btn_pkey, lbl_pkey,
+                                                                                            ssh_btn_sett, btn_hosts, lbl_hosts))
+        ssh_btn_connect = tk.Button(ssh_frame, text="Connect", command=lambda:controller.ssh_connect())
+        lbl_pkey = tk.Label(ssh_frame, text="Private Key")
+        btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_pkey())
+        lbl_hosts = ttk.Label(ssh_frame, text="Known hosts")
+        btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_hosts())
+        #functionality
+        ent_ip.focus()
+        #layout
+        ssh_frame.columnconfigure(0, weight=1)
+        ssh_frame.columnconfigure(1, weight=2)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=2)
+        #position 
+        ssh_frame.grid(row=1, column=0)
+        lbl_main.grid(row=0, column=0, pady=10, padx=10)  
+        lbl_ip.grid(row=0, column=0, padx=10)
+        ent_ip.grid(row=0, column=1)
+        ent_pass.grid(row=1, column=1, pady=10, padx=10)
+        lbl_pass.grid(row=1, column=0)
+        ssh_btn_connect.grid(row=2, column=1, sticky=tk.E, padx=2, pady=2)
+        ssh_btn_sett.grid(row=2, column=0, sticky=tk.W, padx=2, pady=2)
+    
+        def addit_sett(hidden, btn_pkey, lbl_pkey, ssh_btn_sett, btn_hosts, lbl_hosts):
+            if hidden:
+                ssh_btn_sett['text'] = 'More Settings'
+                lbl_pkey.grid_forget()
+                btn_pkey.grid_forget()
+                btn_hosts.grid_forget()
+                lbl_hosts.grid_forget()
+                self.hidden = False
+                return self.hidden
+            else:
+                ssh_btn_sett['text'] = 'Hide Settings'        
+                lbl_pkey.grid(row=3, column=0)
+                btn_pkey.grid(row=3, column=1, sticky=tk.W)
+                lbl_hosts.grid(row=4, column=0)
+                btn_hosts.grid(row=4, column=1, sticky=tk.W)
+                self.hidden = True
+                return self.hidden
+        
+        
+        
+
+    
 class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
