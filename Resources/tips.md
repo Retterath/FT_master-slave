@@ -6,3 +6,6 @@ __ "dunder" means the name is class-specific. Access them from the class itself
 <p> In your settings.json, set "python.languageServer": "Pylance". 
 This extension works better (in my opinion) than the one
 microsoft uses. https://github.com/microsoft/vscode-python/issues/3977 <p>
+
+#args: pass as much crap as you want (passing through values)
+#kwargs: key-word-arguments (passing through dictionaries)

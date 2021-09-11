@@ -1,6 +1,4 @@
-import os, paramiko, subprocess, time
-from guizero import *
-from tkinter import filedialog
+import os, paramiko, subprocess
 from pathlib import Path
 from io import StringIO
 
@@ -18,7 +16,7 @@ def ping_alex(hostname):
 
 def ping_ssh():
     # ping to host...
-    ssh_client = __ssh_connect(target_ip, target_port, target_user)
+    ssh_client = ssh_connect(target_ip, target_port, target_user)
     
     if ssh_client is None:
         print('Connection dead!')
@@ -28,7 +26,7 @@ def ping_ssh():
 ############
 # Connect #
 ############
-def __ssh_connect(host, p, usr):
+def ssh_connect(host, p, usr):
     host_keys_path = Path('Keys','known_hosts')
     session = paramiko.SSHClient()
     try:
@@ -50,7 +48,7 @@ def __ssh_connect(host, p, usr):
     session.close()
     
 def transfer_file(client_path, server_path):
-    ssh_client = __ssh_connect(target_ip, target_port, target_user)
+    ssh_client = ssh_connect(target_ip, target_port, target_user)
     
     if not os.path.isfile(client_path):  
         return -1 # File not found on client

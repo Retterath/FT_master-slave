@@ -90,7 +90,7 @@ class StartPage(tk.Frame):
         lbl_hosts = ttk.Label(ssh_frame, text="Known hosts")
         btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_hosts())
         #functionality
-        ent_ip.focus()
+        ent_ip.focus() #Created the UI "SSH Connect". Functionality will be added this week. Closes #1 Closes #3
         #layout
         ssh_frame.columnconfigure(0, weight=1)
         ssh_frame.columnconfigure(1, weight=2)
@@ -114,7 +114,6 @@ class StartPage(tk.Frame):
                 btn_hosts.grid_forget()
                 lbl_hosts.grid_forget()
                 self.hidden = False
-                return self.hidden
             else:
                 ssh_btn_sett['text'] = 'Hide Settings'        
                 lbl_pkey.grid(row=3, column=0)
@@ -122,7 +121,7 @@ class StartPage(tk.Frame):
                 lbl_hosts.grid(row=4, column=0)
                 btn_hosts.grid(row=4, column=1, sticky=tk.W)
                 self.hidden = True
-                return self.hidden
+            return self.hidden
         
         
         
