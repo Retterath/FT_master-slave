@@ -16,7 +16,7 @@ def ping_alex(hostname):
 
 def ping_ssh():
     # ping to host...
-    ssh_client = ssh_connect(target_ip, target_port, target_user)
+    ssh_client = ssh_conn(target_ip, target_port, target_user)
     
     if ssh_client is None:
         print('Connection dead!')
@@ -26,7 +26,7 @@ def ping_ssh():
 ############
 # Connect #
 ############
-def ssh_connect(host, p, usr):
+def ssh_conn(host, p, usr):
     host_keys_path = Path('Keys','known_hosts')
     session = paramiko.SSHClient()
     try:
@@ -46,9 +46,15 @@ def ssh_connect(host, p, usr):
     session.connect(target_ip, username=target_user, pkey=pkey)
     session.save_host_keys(host_keys_path) 
     session.close()
+def ssh_raw_conn(target_ip, target_pass):
+    session = paramiko.SSHClient()
+    session.load_system_host_keys()
+    session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    session.connect(hostname=target_ip, password=target_pass)
+    return session
     
 def transfer_file(client_path, server_path):
-    ssh_client = ssh_connect(target_ip, target_port, target_user)
+    ssh_client = ssh_conn(target_ip, target_port, target_user)
     
     if not os.path.isfile(client_path):  
         return -1 # File not found on client

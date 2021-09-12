@@ -2,6 +2,7 @@ from guizero import *
 from tkinter import ttk #Like the CSS for tkinter
 import tkinter as tk
 import handshake as hsh
+from pathlib import Path
 
 #Convention:
 #display_NAME: for initializing the objects
@@ -73,16 +74,16 @@ class StartPage(tk.Frame):
         lbl_main = ttk.Label(self, text="Main Page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5)
         ssh_frame = ttk.LabelFrame(self, text="SSH connect")
 
-        ent_pass = ttk.Entry(ssh_frame, show='*')
+        self.ent_pass = ttk.Entry(ssh_frame, show='*')
         lbl_pass = ttk.Label(ssh_frame, text="Password:")
         lbl_ip = ttk.Label(ssh_frame, text="IP Address:")
         self.ent_ip = ttk.Entry(ssh_frame)
-        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, btn_pkey, lbl_pkey,
-                                                                                            ssh_btn_sett, btn_hosts, lbl_hosts))
-        ssh_btn_connect = tk.Button(ssh_frame, text="Connect", command=lambda: Ssh.connect(self,"1","1"))
-        lbl_pkey = tk.Label(ssh_frame, text="Private Key")
-        btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_pkey())
-        lbl_hosts = ttk.Label(ssh_frame, text="Known hosts")
+        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, btn_pkey, self.lbl_pkey,
+                                                                                            ssh_btn_sett, btn_hosts, self.lbl_hosts))
+        ssh_btn_connect = tk.Button(ssh_frame, text="Connect", command=lambda: Ssh.connect(self))
+        self.lbl_pkey = tk.Label(ssh_frame, width=10, text="Private Key")
+        btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda:Ssh.window_pkey(self))
+        self.lbl_hosts = ttk.Label(ssh_frame, text="Known hosts")
         btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_hosts())
         #functionality
         self.ent_ip.focus() #Created the UI "SSH Connect". Functionality will be added this week. Closes #1 Closes #3
@@ -96,7 +97,7 @@ class StartPage(tk.Frame):
         lbl_main.grid(row=0, column=0, pady=10, padx=10)  
         lbl_ip.grid(row=0, column=0, padx=10)
         self.ent_ip.grid(row=0, column=1)
-        ent_pass.grid(row=1, column=1, pady=10, padx=10)
+        self.ent_pass.grid(row=1, column=1, pady=10, padx=10)
         lbl_pass.grid(row=1, column=0)
         ssh_btn_connect.grid(row=2, column=1, sticky=tk.E, padx=2, pady=2)
         ssh_btn_sett.grid(row=2, column=0, sticky=tk.W, padx=2, pady=2)
@@ -118,18 +119,29 @@ class StartPage(tk.Frame):
                 self.hidden = True
             return self.hidden
     @staticmethod
-    def get_ip_entity_string(self):
-        return self.ent_ip.get()
+    def get_ent_text(self):
+        return {'ip':self.ent_ip.get(), 'pass':self.ent_pass.get()}
 class Ssh(StartPage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
-    
-    def connect(self, target_ip, target_pass): #works        
-        entity_str = StartPage.get_ip_entity_string(self)
-        print(entity_str)
-#########
-# Pages #
-#########
+    def window_pkey(self):
+        path = Path().home()
+        file = filedialog.askopenfilename(initialdir = path,title = "Select a private key")
+        path = Path(file)
+        if not file:
+            return None
+        else:
+            self.lbl_pkey.configure(text=path.name)
+        return file
+        #textBox.value = file_name
+        
+    def connect(self): #works        
+        text = StartPage.get_ent_text(self)
+        pkey = self.window_pkey(self)
+        #session = hsh.ssh_raw_conn(target_ip=text['ip'], target_pass=text['pass'])
+        #session.exec_command("ifconfig")
+        #if privatekey and knownhosts are None -> connect raw
+
 
 def main():
     app = App(title='File transfer', width=800, height=600)
@@ -164,19 +176,9 @@ def main():
     def __transfer_file(clientFile, serverFile):
         hsh.trahsh_file(clientFile.value, serverFile.value)
     
-    def __transferFileWindow():
-        
-        file_name = filedialog.askopenfilename(initialdir = "/",title = "Select a File")
-        #textBox.value = file_name
-        hsh.trahsh_file_window()
     
     
-    #I will try and use Tkinter here
-    def ssh_select(): #Choose whether password or private-key should be used
-
-        txtbox_passwd = TextBox(app)
-        btn_pkey = PushButton(app, text="Use key")
-    ssh_select()
+    
     app.display()
 app = tk_main()
 app.geometry("1280x720")
