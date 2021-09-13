@@ -2,6 +2,7 @@ from guizero import *
 from tkinter import ttk #Like the CSS for tkinter
 import tkinter as tk
 import handshake as hsh
+import shutil
 from pathlib import Path
 
 #Convention:
@@ -78,13 +79,13 @@ class StartPage(tk.Frame):
         lbl_pass = ttk.Label(ssh_frame, text="Password:")
         lbl_ip = ttk.Label(ssh_frame, text="IP Address:")
         self.ent_ip = ttk.Entry(ssh_frame)
-        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, btn_pkey, self.lbl_pkey,
-                                                                                            ssh_btn_sett, btn_hosts, self.lbl_hosts))
+        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, self.btn_pkey, self.lbl_pkey,
+                                                                                            ssh_btn_sett, self.btn_hosts, self.lbl_hosts))
         ssh_btn_connect = tk.Button(ssh_frame, text="Connect", command=lambda: Ssh.connect(self))
         self.lbl_pkey = tk.Label(ssh_frame, width=10, text="Private Key")
-        btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda:Ssh.window_pkey(self))
-        self.lbl_hosts = ttk.Label(ssh_frame, text="Known hosts")
-        btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:controller.ssh_hosts())
+        self.btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
+        self.lbl_hosts = ttk.Label(ssh_frame, width=10, text="Known hosts")
+        self.btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
         #functionality
         self.ent_ip.focus() #Created the UI "SSH Connect". Functionality will be added this week. Closes #1 Closes #3
         #layout
@@ -121,23 +122,28 @@ class StartPage(tk.Frame):
     @staticmethod
     def get_ent_text(self):
         return {'ip':self.ent_ip.get(), 'pass':self.ent_pass.get()}
+    
+    def file_window(self, w_name, lbl): #works, but not safe. TODO: read bytes instead
+        to_cwd_path = Path('Keys', 'RSA')
+        from_file = filedialog.askopenfilename(initialdir = Path().home(),title = w_name)
+        from_file_path = Path(from_file)
+        if not from_file:
+            return None
+        if lbl == 'btn_pkey':
+            self.lbl_pkey.configure(text=from_file_path.name)
+        elif lbl == 'btn_hosts':
+            self.lbl_hosts.configure(text=from_file_path.name)
+        with from_file_path.open(mode = 'r') as f:
+            to_cwd_path.write_text(f.read())
+        return from_file    
 class Ssh(StartPage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
-    def window_pkey(self):
-        path = Path().home()
-        file = filedialog.askopenfilename(initialdir = path,title = "Select a private key")
-        path = Path(file)
-        if not file:
-            return None
-        else:
-            self.lbl_pkey.configure(text=path.name)
-        return file
-        #textBox.value = file_name
         
     def connect(self): #works        
         text = StartPage.get_ent_text(self)
-        pkey = self.window_pkey(self)
+        pkey = self.btn_pkey
+        hosts = self.btn_hosts
         #session = hsh.ssh_raw_conn(target_ip=text['ip'], target_pass=text['pass'])
         #session.exec_command("ifconfig")
         #if privatekey and knownhosts are None -> connect raw
