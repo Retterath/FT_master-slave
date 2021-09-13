@@ -7,7 +7,7 @@ def generate_intervals(val_len, offset):
     count = 0
     last_val = 0
     vals = []
-    while True:
+    while val_len > count:
         vals.append(last_val)
         last_val += offset
         count += 1
