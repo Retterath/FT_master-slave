@@ -73,28 +73,34 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, master=parent)        
         #widgets
         lbl_main = ttk.Label(self, text="Main Page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5)
-        ssh_frame = ttk.LabelFrame(self, text="SSH connect")
+        ssh_conn_frame = ttk.LabelFrame(self, text="SSH connect")
+        ssh_status_frame = ttk.LabelFrame(self, text="Status", height=100, width=300)
+        ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5, height=400, width=700)
 
-        self.ent_pass = ttk.Entry(ssh_frame, show='*')
-        lbl_pass = ttk.Label(ssh_frame, text="Password:")
-        lbl_ip = ttk.Label(ssh_frame, text="IP Address:")
-        self.ent_ip = ttk.Entry(ssh_frame)
-        ssh_btn_sett = ttk.Button(ssh_frame, text="More Settings", command=lambda: addit_sett(self.hidden, self.btn_pkey, self.lbl_pkey,
+        self.ent_pass = ttk.Entry(ssh_conn_frame, show='*')
+        lbl_pass = ttk.Label(ssh_conn_frame, text="Password:")
+        lbl_ip = ttk.Label(ssh_conn_frame, text="IP Address:")
+        self.ent_ip = ttk.Entry(ssh_conn_frame)
+        ssh_btn_sett = ttk.Button(ssh_conn_frame, text="More Settings", command=lambda: addit_sett(self.hidden, self.btn_pkey, self.lbl_pkey,
                                                                                             ssh_btn_sett, self.btn_hosts, self.lbl_hosts))
-        ssh_btn_connect = tk.Button(ssh_frame, text="Connect", command=lambda: Ssh.connect(self))
-        self.lbl_pkey = tk.Label(ssh_frame, width=10, text="Private Key")
-        self.btn_pkey = ttk.Button(ssh_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
-        self.lbl_hosts = ttk.Label(ssh_frame, width=10, text="Known hosts")
-        self.btn_hosts = ttk.Button(ssh_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
+        ssh_btn_connect = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
+        self.lbl_pkey = tk.Label(ssh_conn_frame, width=10, text="Private Key")
+        self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
+        self.lbl_hosts = ttk.Label(ssh_conn_frame, width=10, text="Known hosts")
+        self.btn_hosts = ttk.Button(ssh_conn_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
         #functionality
         self.ent_ip.focus() #Created the UI "SSH Connect". Functionality will be added this week. Closes #1 Closes #3
         #layout
-        ssh_frame.columnconfigure(0, weight=1)
-        ssh_frame.columnconfigure(1, weight=2)
+        ssh_conn_frame.columnconfigure(0, weight=1)
+        ssh_conn_frame.columnconfigure(1, weight=2)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=2)
         #position 
-        ssh_frame.grid(row=1, column=0)
+        ssh_conn_frame.grid(row=1, column=0)
+        ssh_status_frame.grid(row=3, column=0)
+        ssh_output_frame.grid(row=1, column=5, padx=50, sticky=tk.SE)
+        #w_id = ssh_status_frame.winfo_id()
+        #os.system('xterm -into %d -geometry 40x20 -sb &' % w_id)
         lbl_main.grid(row=0, column=0, pady=10, padx=10)  
         lbl_ip.grid(row=0, column=0, padx=10)
         self.ent_ip.grid(row=0, column=1)
@@ -125,7 +131,7 @@ class StartPage(tk.Frame):
     
     def file_window(self, w_name, lbl): #works, but not safe. TODO: read bytes instead
         to_cwd_path = Path('Keys', 'RSA')
-        from_file = filedialog.askopenfilename(initialdir = Path().home(),title = w_name)
+        from_file = filedialog.askopenfilename(initialdir = Path().home().joinpath('.ssh'),title = w_name)
         from_file_path = Path(from_file)
         if not from_file:
             return None
