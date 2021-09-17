@@ -71,58 +71,73 @@ class StartPage(tk.Frame):
     hidden = False
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, master=parent)        
-        #widgets
-        lbl_main = ttk.Label(self, text="Main Page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5)
+        # Frames
+        lbl_main = ttk.Label(self, text="Homepage", font=LARGE_FONT, borderwidth=5)
         ssh_conn_frame = ttk.LabelFrame(self, text="SSH connect")
         ssh_status_frame = ttk.LabelFrame(self, text="Status", height=100, width=300)
-        ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5, height=400, width=700)
-
+        ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5, height=200, width=700)
+        
+        # Entities
         self.ent_pass = ttk.Entry(ssh_conn_frame, show='*')
+        self.ent_ip = ttk.Entry(ssh_conn_frame)
+        
+        # Labels
         lbl_pass = ttk.Label(ssh_conn_frame, text="Password:")
         lbl_ip = ttk.Label(ssh_conn_frame, text="IP Address:")
-        self.ent_ip = ttk.Entry(ssh_conn_frame)
-        ssh_btn_sett = ttk.Button(ssh_conn_frame, text="More Settings", command=lambda: addit_sett(self.hidden, self.btn_pkey, self.lbl_pkey,
-                                                                                            ssh_btn_sett, self.btn_hosts, self.lbl_hosts))
-        ssh_btn_connect = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
         self.lbl_pkey = tk.Label(ssh_conn_frame, width=10, text="Private Key")
-        self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
         self.lbl_hosts = ttk.Label(ssh_conn_frame, width=10, text="Known hosts")
+        
+        # Buttons
+        #TODO: Add a ping button with the option (ckeckbox) <- if checked, ping every N seconds
+        ssh_btn_connect = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
+        self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
         self.btn_hosts = ttk.Button(ssh_conn_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
+        ssh_btn_sett = ttk.Button(ssh_conn_frame, text="More Settings", command=lambda: addit_sett(self))
         #functionality
-        self.ent_ip.focus() #Created the UI "SSH Connect". Functionality will be added this week. Closes #1 Closes #3
-        #layout
-        ssh_conn_frame.columnconfigure(0, weight=1)
-        ssh_conn_frame.columnconfigure(1, weight=2)
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=2)
-        #position 
-        ssh_conn_frame.grid(row=1, column=0)
-        ssh_status_frame.grid(row=3, column=0)
-        ssh_output_frame.grid(row=1, column=5, padx=50, sticky=tk.SE)
+        self.ent_ip.focus() 
+
+        #layout of columns/rows
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        ssh_conn_frame.grid_rowconfigure(1, weight=1)
+        ssh_conn_frame.grid_columnconfigure(0, weight=1)
+        ssh_output_frame.grid_columnconfigure(1, weight=1)
+        ssh_output_frame.grid_rowconfigure(1, weight=1)
         #w_id = ssh_status_frame.winfo_id()
         #os.system('xterm -into %d -geometry 40x20 -sb &' % w_id)
-        lbl_main.grid(row=0, column=0, pady=10, padx=10)  
-        lbl_ip.grid(row=0, column=0, padx=10)
-        self.ent_ip.grid(row=0, column=1)
-        self.ent_pass.grid(row=1, column=1, pady=10, padx=10)
-        lbl_pass.grid(row=1, column=0)
-        ssh_btn_connect.grid(row=2, column=1, sticky=tk.E, padx=2, pady=2)
-        ssh_btn_sett.grid(row=2, column=0, sticky=tk.W, padx=2, pady=2)
+        
+        #layout of frames
+        ssh_conn_frame.grid(row=1, column= 0, sticky="w")
+        ssh_status_frame.grid(row=2, column=0, sticky="w")
+        ssh_output_frame.grid(row=1, column=1, sticky="e")
+        
+        #layout of labels
+        lbl_main.grid(row=0, column=0, pady=10, padx=10, sticky="nw")  
+        lbl_ip.grid(row=0, column=0, padx=1, sticky="w")
+        lbl_pass.grid(row=1, column=0, padx=1, sticky="w")
+        
+        #layout of entities
+        self.ent_ip.grid(row=0, column=1, padx=10, pady=1, sticky="e")
+        self.ent_pass.grid(row=1, column=1, padx=10, pady=3, sticky="e")
+        
+        #layout of buttons
+        ssh_btn_connect.grid(row=2, column=1, padx=2, pady=2, sticky="w")
+        ssh_btn_sett.grid(row=2, column=0, padx=2, pady=2, sticky="w")
     
-        def addit_sett(hidden, btn_pkey, lbl_pkey, ssh_btn_sett, btn_hosts, lbl_hosts):
-            if hidden:
+        def addit_sett(self):
+            if self.hidden:
                 ssh_btn_sett['text'] = 'More Settings'
-                lbl_pkey.grid_forget()
-                btn_pkey.grid_forget()
-                btn_hosts.grid_forget()
-                lbl_hosts.grid_forget()
+                self.lbl_pkey.grid_forget()
+                self.btn_pkey.grid_forget()
+                self.btn_hosts.grid_forget()
+                self.lbl_hosts.grid_forget()
                 self.hidden = False
             else:
                 ssh_btn_sett['text'] = 'Hide Settings'        
-                lbl_pkey.grid(row=3, column=0)
-                btn_pkey.grid(row=3, column=1, sticky=tk.W)
-                lbl_hosts.grid(row=4, column=0)
-                btn_hosts.grid(row=4, column=1, sticky=tk.W)
+                self.lbl_pkey.grid(row=3, column=0)
+                self.btn_pkey.grid(row=3, column=1, sticky=tk.W)
+                self.lbl_hosts.grid(row=4, column=0)
+                self.btn_hosts.grid(row=4, column=1, sticky=tk.W)
                 self.hidden = True
             return self.hidden
     @staticmethod
@@ -147,13 +162,18 @@ class Ssh(StartPage):
         super().__init__(parent, controller)
         
     def connect(self): #works        
-        text = StartPage.get_ent_text(self)
+        cred = StartPage.get_ent_text(self) #TODO: Add port
         pkey = self.btn_pkey
-        hosts = self.btn_hosts
+        hosts = self.btn_hosts 
+
+        #if privatekey and knownhosts are None -> connect raw
+        if (pkey is None) or (hosts is None):
+            session = hsh.ssh_raw_conn(target_ip=cred['ip'], target_pass=cred['pass'])
+        else:
+            session = hsh.ssh_conn(cred['ip'], cred['pass'], 22)
+        
         #session = hsh.ssh_raw_conn(target_ip=text['ip'], target_pass=text['pass'])
         #session.exec_command("ifconfig")
-        #if privatekey and knownhosts are None -> connect raw
-
 
 def main():
     app = App(title='File transfer', width=800, height=600)
@@ -193,5 +213,5 @@ def main():
     
     app.display()
 app = tk_main()
-app.geometry("1280x720")
+app.geometry('{}x{}'.format(960, 350))
 app.mainloop()

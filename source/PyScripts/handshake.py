@@ -26,7 +26,7 @@ def ping_ssh():
 ############
 # Connect #
 ############
-def ssh_conn(host, p, usr):
+def ssh_conn(target_ip, target_pass, port):
     host_keys_path = Path('Keys','known_hosts')
     session = paramiko.SSHClient()
     try:
