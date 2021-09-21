@@ -2,8 +2,10 @@ import os, paramiko, subprocess
 from pathlib import Path
 from io import StringIO
 
-target_ip = '192.168.1.119'
-target_user = 'tom'
+from paramiko.client import AutoAddPolicy, SSHClient
+
+target_ip = '192.168.122.174'
+target_user = 'retterath-ubuntu-server'
 target_port = 22
 
 def ping_alex(hostname):
@@ -27,15 +29,15 @@ def ping_ssh():
 # Connect #
 ############
 def ssh_conn(target_ip, target_pass, port):
-    host_keys_path = Path('Keys','known_hosts')
+    host_keys_path = Path('source','Keys','known_hosts')
     session = paramiko.SSHClient()
-    try:
-        host_keys = paramiko.HostKeys(host_keys_path)
-    except: 
-        print("Corrupted host_keys file.")
-        return 0 #Add method for fixing corrupted host keys
+    #try:
+    host_keys = paramiko.HostKeys(host_keys_path)
+    #except: 
+     #   print("Corrupted host_keys file.")
+     #   return 0 #Add method for fixing corrupted host keys
         
-    pkey = __generate_RSA_KEY(target_ip, 'd')
+    pkey = __generate_RSA_KEY(target_ip, None)
     session.load_host_keys(host_keys_path)
     if host_keys.lookup(target_ip) is None:
         session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -114,4 +116,10 @@ def __generate_RSA_KEY(target_ip, key_path):
     pkey.write_private_key_file(rsa_dir)
     
     return pkey 
-__generate_RSA_KEY(target_ip, None)
+# client = SSHClient()
+# client.load_host_keys('/home/retterath/.ssh/known_hosts')
+# client.load_system_host_keys()
+# client.set_missing_host_key_policy(AutoAddPolicy())
+# client.connect('192.168.122.174', username=target_user)
+# stdin, stdout, stderr = client.exec_command('hostname')
+# print(f'{stdout.read().decode()}')

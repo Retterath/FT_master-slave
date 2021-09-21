@@ -2,6 +2,7 @@
 _ means the name is to be treated like private
 __ "dunder" means the name is class-specific. Access them from the class itself
 
+<b>Tkinter</b> We should not use fixed height/width. That excludes the use of: grid_propagate(), pack_propagate(), width, height
 ## VS CODE
 <p> In your settings.json, set "python.languageServer": "Pylance". 
 This extension works better (in my opinion) than the one

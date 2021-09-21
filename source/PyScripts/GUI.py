@@ -1,5 +1,5 @@
 from guizero import *
-from tkinter import ttk #Like the CSS for tkinter
+from tkinter import font, ttk #Like the CSS for tkinter
 import tkinter as tk
 import handshake as hsh
 import shutil
@@ -40,13 +40,16 @@ def popupmsg(msg):
     btn1 = ttk.Button(popup, text="Okay", command = popup.destroy)
     btn1.pack()
 class tk_main(tk.Tk):    
-    def __init__(self, *args, **kwargs): #Runs on initialisation (load stuff)
+    def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "FT_Master-Slave")
-        self.main_frame = tk.Frame(self, background="cyan", relief=tk.RAISED, borderwidth=5)
-        self.main_frame.grid(row=0, column=0)
 
-        menubar = tk.Menu(self.main_frame)
+        container = tk.Frame(self, background="bisque", relief=tk.RAISED, borderwidth=5) 
+        container.grid(row=0, column=0)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command= lambda: popupmsg("Not supported just yet!"))
         filemenu.add_separator()
@@ -55,9 +58,9 @@ class tk_main(tk.Tk):
         tk.Tk.config(self, menu=menubar)
 
         self.frames = {}        
-        frame = StartPage(self.main_frame,self)
+        frame = StartPage(parent=self, controller=container)
         self.frames[StartPage] = frame
-        frame.grid(row=3,column=3, sticky="nsew")        
+        frame.grid(row=0, column=0, sticky="n")       
         self.show_frame(StartPage)
 
 
@@ -69,15 +72,16 @@ class tk_main(tk.Tk):
 #########
 class StartPage(tk.Frame):
     hidden = False
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, master=parent)        
+    def __init__(self, parent, controller): #controller = black Frame
+        tk.Frame.__init__(self, parent, controller)        
+
         # Frames
-        lbl_main = ttk.Label(self, text="Homepage", font=LARGE_FONT, borderwidth=5)
+        frm_nav = tk.Frame(self, bg="bisque2")        
         ssh_conn_frame = ttk.LabelFrame(self, text="SSH connect")
-        ssh_status_frame = ttk.LabelFrame(self, text="Status", height=100, width=300)
-        ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5, height=200, width=700)
+        ssh_status_frame = ttk.LabelFrame(self, text="Status")
+        ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5)
         
-        # Entities
+        # Entries
         self.ent_pass = ttk.Entry(ssh_conn_frame, show='*')
         self.ent_ip = ttk.Entry(ssh_conn_frame)
         
@@ -86,33 +90,44 @@ class StartPage(tk.Frame):
         lbl_ip = ttk.Label(ssh_conn_frame, text="IP Address:")
         self.lbl_pkey = tk.Label(ssh_conn_frame, width=10, text="Private Key")
         self.lbl_hosts = ttk.Label(ssh_conn_frame, width=10, text="Known hosts")
-        
+         
         # Buttons
         #TODO: Add a ping button with the option (ckeckbox) <- if checked, ping every N seconds
+        btn_home = ttk.Button(frm_nav, text="Homepage")
+        btn_matplot = ttk.Button(frm_nav, text="Matplotlib")
         ssh_btn_connect = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
         self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
         self.btn_hosts = ttk.Button(ssh_conn_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
         ssh_btn_sett = ttk.Button(ssh_conn_frame, text="More Settings", command=lambda: addit_sett(self))
+        
+        # Text
+        txt_status = tk.Text(ssh_status_frame,state='disabled', font=('Arial', 16), width=20, height=3)
+        txt_data = tk.Text(ssh_output_frame, state='disabled', font=('Arial', 16), width=30, height=6)
         #functionality
         self.ent_ip.focus() 
+        
+        # layout of columns/rows
+        self.columnconfigure(0, weight=1, minsize=75)
+        self.rowconfigure(0, weight=1, minsize=50)
+        
+        frm_nav.columnconfigure(0, weight=1)
+        frm_nav.columnconfigure(1, weight=1)
+        frm_nav.rowconfigure(0, weight=1)
 
-        #layout of columns/rows
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        ssh_conn_frame.grid_rowconfigure(1, weight=1)
-        ssh_conn_frame.grid_columnconfigure(0, weight=1)
-        ssh_output_frame.grid_columnconfigure(1, weight=1)
-        ssh_output_frame.grid_rowconfigure(1, weight=1)
-        #w_id = ssh_status_frame.winfo_id()
-        #os.system('xterm -into %d -geometry 40x20 -sb &' % w_id)
+        ssh_conn_frame.columnconfigure(1, weight=1)
+        ssh_conn_frame.rowconfigure(1, weight=1)
+        ssh_status_frame.columnconfigure(0, weight=1)
+        ssh_status_frame.rowconfigure(0, weight=1)
+        #w_id = ssh_output_frame.winfo_id()
+        #os.system('xterm -into %d -geometry 132x123 -sb &' % w_id)
         
         #layout of frames
+        frm_nav.grid(row=0, column=0, sticky="ew")
         ssh_conn_frame.grid(row=1, column= 0, sticky="w")
-        ssh_status_frame.grid(row=2, column=0, sticky="w")
-        ssh_output_frame.grid(row=1, column=1, sticky="e")
+        ssh_status_frame.grid(row=2, column=0, sticky="ew")
+        ssh_output_frame.grid(row=1, column=1, sticky="ew")
         
         #layout of labels
-        lbl_main.grid(row=0, column=0, pady=10, padx=10, sticky="nw")  
         lbl_ip.grid(row=0, column=0, padx=1, sticky="w")
         lbl_pass.grid(row=1, column=0, padx=1, sticky="w")
         
@@ -120,7 +135,13 @@ class StartPage(tk.Frame):
         self.ent_ip.grid(row=0, column=1, padx=10, pady=1, sticky="e")
         self.ent_pass.grid(row=1, column=1, padx=10, pady=3, sticky="e")
         
+        #layout of texts
+        txt_status.grid(row=0, column=0)
+        txt_data.grid(row=0, column=0)
+
         #layout of buttons
+        btn_home.grid(row=0, column=0, sticky="nw")
+        btn_matplot.grid(row=0, column=1, sticky="nw")
         ssh_btn_connect.grid(row=2, column=1, padx=2, pady=2, sticky="w")
         ssh_btn_sett.grid(row=2, column=0, padx=2, pady=2, sticky="w")
     
@@ -146,7 +167,7 @@ class StartPage(tk.Frame):
     
     def file_window(self, w_name, lbl): #works, but not safe. TODO: read bytes instead
         to_cwd_path = Path('Keys', 'RSA')
-        from_file = filedialog.askopenfilename(initialdir = Path().home().joinpath('.ssh'),title = w_name)
+        from_file = filedialog.askopenfilename(initialdir = Path().home(),title = w_name)
         from_file_path = Path(from_file)
         if not from_file:
             return None
@@ -156,7 +177,7 @@ class StartPage(tk.Frame):
             self.lbl_hosts.configure(text=from_file_path.name)
         with from_file_path.open(mode = 'r') as f:
             to_cwd_path.write_text(f.read())
-        return from_file    
+        return from_file
 class Ssh(StartPage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
@@ -213,5 +234,5 @@ def main():
     
     app.display()
 app = tk_main()
-app.geometry('{}x{}'.format(960, 350))
+#app.geometry('{}x{}'.format(960, 350))
 app.mainloop()
