@@ -8,22 +8,12 @@ target_ip = '192.168.122.174'
 target_user = 'retterath-ubuntu-server'
 target_port = 22
 
-def ping_alex(hostname):
+def ping_ssh(hostname):
     response = os.system('ping -c 1 ' + hostname) #UPDATE
     #and then check the response...
     if response == 0:
-      print(hostname, 'is up!')
-    else:
-      print(hostname, 'is down!')
-
-def ping_ssh():
-    # ping to host...
-    ssh_client = ssh_conn(target_ip, target_port, target_user)
-    
-    if ssh_client is None:
-        print('Connection dead!')
-    else:
-        print('Connection alive!')
+      return f"{hostname} 'is up!')"
+    return f"{hostname} 'is down!')"
 
 ############
 # Connect #

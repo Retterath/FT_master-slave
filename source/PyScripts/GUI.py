@@ -58,14 +58,20 @@ class tk_main(tk.Tk):
         tk.Tk.config(self, menu=menubar)
 
         self.frames = {}        
-        frame = StartPage(parent=self, controller=container)
-        self.frames[StartPage] = frame
-        frame.grid(row=0, column=0, sticky="n")       
+        # frame = StartPage(parent=self, controller=container)
+        # self.frames[StartPage] = frame
+        # frame.grid(row=0, column=0, sticky="n")  
+
+        for F in (StartPage,PageMatPlot):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=3,column=3, sticky="nsew")             
         self.show_frame(StartPage)
 
 
     def show_frame(self, cont):
-        frame = self.frames[cont] #key
+
+        frame = self.frames[cont]
         frame.tkraise()
 #########
 # Pages #
@@ -73,7 +79,7 @@ class tk_main(tk.Tk):
 class StartPage(tk.Frame):
     hidden = False
     def __init__(self, parent, controller): #controller = black Frame
-        tk.Frame.__init__(self, parent, controller)        
+        tk.Frame.__init__(self, parent)        
 
         # Frames
         frm_nav = tk.Frame(self, bg="bisque2")        
@@ -82,19 +88,21 @@ class StartPage(tk.Frame):
         ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5)
         
         # Entries
+        self.ent_ping = ttk.Entry(self)
         self.ent_pass = ttk.Entry(ssh_conn_frame, show='*')
         self.ent_ip = ttk.Entry(ssh_conn_frame)
         
         # Labels
+        self.lbl_ping = ttk.Label(self, text="NO")
         lbl_pass = ttk.Label(ssh_conn_frame, text="Password:")
         lbl_ip = ttk.Label(ssh_conn_frame, text="IP Address:")
         self.lbl_pkey = tk.Label(ssh_conn_frame, width=10, text="Private Key")
         self.lbl_hosts = ttk.Label(ssh_conn_frame, width=10, text="Known hosts")
          
         # Buttons
-        #TODO: Add a ping button with the option (ckeckbox) <- if checked, ping every N seconds
+        btn_ping = ttk.Button(self, text="Ping", command=lambda: Ssh.ping(self))
         btn_home = ttk.Button(frm_nav, text="Homepage")
-        btn_matplot = ttk.Button(frm_nav, text="Matplotlib")
+        btn_matplot = ttk.Button(frm_nav, text="Matplotlib", command=lambda: controller.show_frame(PageMatPlot))
         ssh_btn_connect = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
         self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", command=lambda: self.file_window('Select a private key', 'btn_pkey'))
         self.btn_hosts = ttk.Button(ssh_conn_frame, text="Select", command=lambda:self.file_window('Select a host file', 'btn_hosts'))
@@ -128,10 +136,12 @@ class StartPage(tk.Frame):
         ssh_output_frame.grid(row=1, column=1, sticky="ew")
         
         #layout of labels
+        self.lbl_ping.grid(row=0, column=3)
         lbl_ip.grid(row=0, column=0, padx=1, sticky="w")
         lbl_pass.grid(row=1, column=0, padx=1, sticky="w")
         
         #layout of entities
+        self.ent_ping.grid(row=0, column=2)
         self.ent_ip.grid(row=0, column=1, padx=10, pady=1, sticky="e")
         self.ent_pass.grid(row=1, column=1, padx=10, pady=3, sticky="e")
         
@@ -140,6 +150,7 @@ class StartPage(tk.Frame):
         txt_data.grid(row=0, column=0)
 
         #layout of buttons
+        btn_ping.grid(row=0, column=1)
         btn_home.grid(row=0, column=0, sticky="nw")
         btn_matplot.grid(row=0, column=1, sticky="nw")
         ssh_btn_connect.grid(row=2, column=1, padx=2, pady=2, sticky="w")
@@ -195,44 +206,21 @@ class Ssh(StartPage):
         
         #session = hsh.ssh_raw_conn(target_ip=text['ip'], target_pass=text['pass'])
         #session.exec_command("ifconfig")
+    def ping(self):
+        target_ip = self.ent_ping.get()
+        status = hsh.ping_ssh(target_ip)
+        self.lbl_ping.config(text = status)
+class PageMatPlot(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text="Matplotlib page", font=LARGE_FONT,relief=tk.GROOVE, borderwidth=5) 
+        label.pack(pady=10, padx=10) #Padding outside label
 
-def main():
-    app = App(title='File transfer', width=800, height=600)
-    
-    def display_ping():
-        box_ping = Box(app, width=300, height=200, border=1,layout='grid',align='left')
-        PushButton(box_ping,command=lambda: __ping(input_box),text="Ping",grid=[0,0])
-        input_box = TextBox(box_ping, grid=[10,0])
-    def __ping(inputBox):
-        hsh.pinhshx(inputBox.value)
-    def display_transfer_file():
-        #width=800, height=600
-        
-        box_transfer = Box(app, width=300, height=200, border=1,layout='grid',align='right')
-        #client
-        client_file = Text(box_transfer, text="Client file",grid=[0,0])
-        text_clientFile = TextBox(box_transfer,text="", grid=[10,0])
-        text_clientFile.disable()
-        PushButton(box_transfer, command=lambda: __transferFileWindow(),text="Search",grid=[20,0])
-        
-        #server
-        server_file = Text(box_transfer, text="Server file", grid=[0,10])
-        text_serverFile = TextBox(box_transfer, grid=[10,10])
-        text_serverFile.disable()
-        PushButton(box_transfer,command=lambda: __transferFileWindow(text_clientFile),text="Search",grid=[20,10])
-        
-        transfer_button = PushButton(box_transfer, command=__transfer_file,
-                                             args=[text_clientFile, text_serverFile],
-                                             text="Transfer", grid=[20,30])
-        
-    
-    def __transfer_file(clientFile, serverFile):
-        hsh.trahsh_file(clientFile.value, serverFile.value)
-    
-    
-    
-    
-    app.display()
+        button1 = ttk.Button(self, text="Back to Homepage",
+                            command = lambda: controller.show_frame(StartPage))
+        button1.pack()
+       
+
 app = tk_main()
 #app.geometry('{}x{}'.format(960, 350))
 app.mainloop()
