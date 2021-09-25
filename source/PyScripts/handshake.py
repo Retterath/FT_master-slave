@@ -37,6 +37,7 @@ def ssh_conn(target_ip, target_pass, port):
     session.connect(target_ip, username=target_user, pkey=pkey)
     session.save_host_keys(host_keys_path) 
     session.close()
+    
 def ssh_raw_conn(target_ip, target_pass, user):
     session = paramiko.SSHClient()
     session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
