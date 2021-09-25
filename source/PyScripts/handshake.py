@@ -10,10 +10,9 @@ target_port = 22
 
 def ping_ssh(hostname):
     response = os.system('ping -c 1 ' + hostname) #UPDATE
-    #and then check the response...
     if response == 0:
-      return f"{hostname} 'is up!')"
-    return f"{hostname} 'is down!')"
+      return "ON"
+    return "OFF"
 
 ############
 # Connect #
@@ -21,11 +20,11 @@ def ping_ssh(hostname):
 def ssh_conn(target_ip, target_pass, port):
     host_keys_path = Path('source','Keys','known_hosts')
     session = paramiko.SSHClient()
-    #try:
-    host_keys = paramiko.HostKeys(host_keys_path)
-    #except: 
-     #   print("Corrupted host_keys file.")
-     #   return 0 #Add method for fixing corrupted host keys
+    try:
+        host_keys = paramiko.HostKeys(host_keys_path)
+    except: 
+       print("Corrupted host_keys file.")
+       return 0
         
     pkey = __generate_RSA_KEY(target_ip, None)
     session.load_host_keys(host_keys_path)
@@ -34,15 +33,17 @@ def ssh_conn(target_ip, target_pass, port):
     
     else:
         session.set_missing_host_key_policy(paramiko.RejectPolicy())
-    
+    #CRASHES
     session.connect(target_ip, username=target_user, pkey=pkey)
     session.save_host_keys(host_keys_path) 
     session.close()
-def ssh_raw_conn(target_ip, target_pass):
+def ssh_raw_conn(target_ip, target_pass, user):
     session = paramiko.SSHClient()
-    session.load_system_host_keys()
     session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    session.connect(hostname=target_ip, password=target_pass)
+    session.connect(hostname = target_ip, 
+            username = user, 
+            password = target_pass)
+    
     return session
     
 def transfer_file(client_path, server_path):
@@ -84,6 +85,7 @@ def __generate_RSA_KEY(target_ip, key_path):
     rsa_dir = Path('Keys','RSA')
 
     if key_path is None:
+        #Check OS
         for curr_file_path in ssh_dir.iterdir():
             if curr_file_path.name == 'id_rsa': #Returns private key file
                 key_path = curr_file_path
