@@ -1,5 +1,5 @@
 from guizero import *
-from tkinter import BooleanVar, StringVar, ttk #Like the CSS for tkinter
+from tkinter import BooleanVar, Menu, StringVar, ttk #Like the CSS for tkinter
 import tkinter as tk
 import handshake as hsh
 import shutil
@@ -39,6 +39,15 @@ def popupmsg(msg):
     lbl.pack(side="top", fill="x", pady=10)
     btn1 = ttk.Button(popup, text="Okay", command = popup.destroy)
     btn1.pack()
+
+def openCLI():
+    window = tk.Toplevel() #window that has an independent existence under the window manager
+    window.lift()
+    window.geometry('1334x486+150+150')
+    window.resizable(width=True, height=True)
+    window.title("Remote CLI")
+    w_id = window.winfo_id()
+    os.system('xterm -into %d -geometry 230x50 -sb &' % w_id)
 class tk_main(tk.Tk):    
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -58,6 +67,14 @@ class tk_main(tk.Tk):
         menubar.add_cascade(label="File", menu=filemenu)
         tk.Tk.config(self, menu=menubar)
 
+        sshbar = tk.Menu(container, tearoff=0)
+        sshbar.add_command(label="Open CLI", command= lambda: openCLI())
+        sshbar.add_separator()
+        menubar.add_cascade(label="Extra", menu=sshbar)
+        tk.Tk.config(self, menu=menubar)
+
+
+
         self.frames = {}        
         for F in (StartPage,PageMatPlot):
             frame = F(container, self)
@@ -76,7 +93,8 @@ class tk_main(tk.Tk):
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)        
-        self.sett_state = BooleanVar(self, value = True)
+        self.sett_state = BooleanVar(self, value = False)
+        self.usr = StringVar(self)
         self.pwd = StringVar(self)
         self.ip = StringVar(self)
         self.pkey_path = StringVar(self)
@@ -89,6 +107,7 @@ class StartPage(tk.Frame):
         ssh_output_frame = ttk.LabelFrame(self, text="Output", relief=tk.SUNKEN, borderwidth=5)
         
         # Entries
+        ent_user = ttk.Entry(ssh_conn_frame, textvariable=self.usr)
         ent_pass = ttk.Entry(ssh_conn_frame, show='*', textvariable=self.pwd)
         ent_ip = ttk.Entry(ssh_conn_frame, textvariable=self.ip)
         self.ent_pkey = ttk.Entry(ssh_conn_frame, state='disabled', textvariable=self.pkey_path)
@@ -96,26 +115,28 @@ class StartPage(tk.Frame):
 
         ent_pass.insert(0, '161198')
         ent_ip.insert(0, '192.168.122.174')
+        ent_user.insert(0, 'server')
 
         # Labels
+        lbl_user = ttk.Label(ssh_conn_frame, text="Username")
         lbl_sett = ttk.Label(ssh_conn_frame, text="More Settings")
-        self.lbl_ping = ttk.Label(ssh_conn_frame, width=5)
+        self.lbl_ping = tk.Label(ssh_conn_frame, width=5, fg='green')
         lbl_pass = ttk.Label(ssh_conn_frame, text="Password:")
         lbl_ip = ttk.Label(ssh_conn_frame, text="IP Address:")
         self.lbl_pkey = tk.Label(ssh_conn_frame, text="Private Key", width=10, justify=tk.LEFT)
         self.lbl_hosts = ttk.Label(ssh_conn_frame, text="Known host", width=10, justify=tk.LEFT)
          
         # Buttons & Checkbuttons
-        chk_btn = tk.Checkbutton(ssh_conn_frame, variable=self.sett_state, command= lambda: addit_sett(self))
+        chk_btn = tk.Checkbutton(ssh_conn_frame, variable=self.sett_state, command= lambda: addit_sett())
         btn_ping = ttk.Button(ssh_conn_frame, text="Ping", command=lambda: Ssh.ping(self))
         btn_home = ttk.Button(frm_nav, text="Homepage")
         btn_matplot = ttk.Button(frm_nav, text="Matplotlib", command=lambda: controller.show_frame(PageMatPlot))
         btn_conn = tk.Button(ssh_conn_frame, text="Connect", command=lambda: Ssh.connect(self))
-        self.btn_pkey = ttk.Button(ssh_conn_frame, text="Select", state='disabled',command=lambda: self.file_window('Select a private key', 'btn_pkey'))
-        self.btn_hosts = ttk.Button(ssh_conn_frame, text="Select", state='disabled',command=lambda:self.file_window('Select a host file', 'btn_hosts'))
+        btn_key = ttk.Button(ssh_conn_frame, text="Select", state='disabled',command=lambda: self.file_window('Select a private key', 'btn_pkey'))
+        btn_host = ttk.Button(ssh_conn_frame, text="Select", state='disabled',command=lambda:self.file_window('Select a host file', 'btn_hosts'))
         
         # Text
-        self.txt_status = tk.Text(ssh_status_frame,state='disabled', font=('Arial', 16), width=20, height=3)
+        self.txt_status = tk.Text(ssh_status_frame,state='disabled', font=('Courier New', 11), width=40, height=5)
         txt_data = tk.Text(ssh_output_frame, state='disabled', font=('Arial', 16), width=30, height=6)
         #functionality
         ent_ip.focus() 
@@ -132,8 +153,6 @@ class StartPage(tk.Frame):
         ssh_conn_frame.rowconfigure(1, weight=1)
         ssh_status_frame.columnconfigure(0, weight=1)
         ssh_status_frame.rowconfigure(0, weight=1)
-        #w_id = ssh_output_frame.winfo_id()
-        #os.system('xterm -into %d -geometry 132x123 -sb &' % w_id)
         
         #layout of frames
         frm_nav.grid(row=0, column=0, sticky="ew")
@@ -142,46 +161,45 @@ class StartPage(tk.Frame):
         ssh_output_frame.grid(row=2, column=4, sticky="ns")
         
         #layout of labels
-        self.lbl_pkey.grid(row=3, column=0)
-        self.lbl_hosts.grid(row=4, column=0)
-        lbl_sett.grid(row=2, column=0)
+        lbl_user.grid(row=1, column=0, sticky="w")
+        self.lbl_pkey.grid(row=4, column=0)
+        self.lbl_hosts.grid(row=5, column=0)
+        lbl_sett.grid(row=3, column=0)
         self.lbl_ping.grid(row=0, column=3)
         lbl_ip.grid(row=0, column=0, padx=1, sticky="w")
-        lbl_pass.grid(row=1, column=0, padx=1, sticky="w")
+        lbl_pass.grid(row=2, column=0, padx=1, sticky="w")
         
         #layout of entities        
+        ent_user.grid(row=1, column=1)
         ent_ip.grid(row=0, column=1, padx=10, pady=1, sticky="e")
-        ent_pass.grid(row=1, column=1, padx=10, pady=3, sticky="e")
-        self.ent_pkey.grid(row=3, column=1)
-        self.ent_host.grid(row=4, column=1)
+        ent_pass.grid(row=2, column=1, padx=10, pady=3, sticky="e")
+        self.ent_pkey.grid(row=4, column=1)
+        self.ent_host.grid(row=5, column=1)
         
         #layout of texts
         self.txt_status.grid(row=0, column=0)
         txt_data.grid(row=0, column=0)
 
         #layout of buttons & checkbuttons
-        self.btn_pkey.grid(row=3, column=2, sticky="w")
-        self.btn_hosts.grid(row=4, column=2, sticky="w")
-        chk_btn.grid(row=2, column=1, sticky="w")
+        btn_key.grid(row=4, column=2, sticky="w")
+        btn_host.grid(row=5, column=2, sticky="w")
+        chk_btn.grid(row=3, column=1, sticky="w")
         btn_ping.grid(row=0, column=2)
         btn_home.grid(row=0, column=0, sticky="nw")
         btn_matplot.grid(row=0, column=1, sticky="nw")
-        btn_conn.grid(row=2, column=3, padx=2, pady=2, sticky="w")
+        btn_conn.grid(row=3, column=3, padx=2, pady=2, sticky="w")
     
-        def addit_sett(self):
-            if self.sett_state:
-                
+        def addit_sett():
+            if self.sett_state.get():
                 self.ent_pkey.config(state='enabled')
                 self.ent_host.config(state='enabled')
-                self.btn_pkey.config(state='enabled')
-                self.btn_hosts.config(state='enabled')
-                self.sett_state = False
+                btn_key.config(state='enabled')
+                btn_host.config(state='enabled')
             else: 
                 self.ent_pkey.config(state='disabled')
                 self.ent_host.config(state='disabled')
-                self.btn_pkey.config(state='disabled')
-                self.btn_hosts.config(state='disabled')
-                self.sett_state = True
+                btn_key.config(state='disabled')
+                btn_host.config(state='disabled')
             return self.sett_state
     
     def file_window(self, w_name, lbl):
@@ -210,14 +228,16 @@ class Ssh(StartPage):
         target_ip = self.ip.get()
         pkey = self.pkey_path.get()
         host = self.host_path.get()
-        user = 'retterath-ubuntu-server'
+        user = self.usr.get()
+        
         if (pkey=='') or (host==''):
             session = hsh.ssh_raw_conn(target_ip = target_ip, 
                     target_pass = target_pass, 
                     user = user)
+            self.txt_status.config(state='normal')
+            self.txt_status.insert(tk.END, "Connected:\n")
             stdin, stdout, stderr = session.exec_command('whoami')
             output = stdout.read().decode()
-            self.txt_status.config(state='normal')
             self.txt_status.insert(tk.END, output)
 
         else:
@@ -231,7 +251,11 @@ class Ssh(StartPage):
     def ping(self):
         target_ip = self.ip.get()
         status = hsh.ping_ssh(target_ip)
-        self.lbl_ping.config(text = status)
+        if status == "ON":
+            self.lbl_ping.config(text = status, fg='green')
+            return
+        self.lbl_ping.config(text = status, fg='red')
+        return
 class PageMatPlot(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)

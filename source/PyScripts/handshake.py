@@ -15,7 +15,7 @@ def ping_ssh(hostname):
     return "OFF"
 
 ############
-# Connect #
+# Connect  #
 ############
 def ssh_conn(target_ip, target_pass, port):
     host_keys_path = Path('source','Keys','known_hosts')
@@ -109,10 +109,3 @@ def __generate_RSA_KEY(target_ip, key_path):
     pkey.write_private_key_file(rsa_dir)
     
     return pkey 
-# client = SSHClient()
-# client.load_host_keys('/home/retterath/.ssh/known_hosts')
-# client.load_system_host_keys()
-# client.set_missing_host_key_policy(AutoAddPolicy())
-# client.connect('192.168.122.174', username=target_user)
-# stdin, stdout, stderr = client.exec_command('hostname')
-# print(f'{stdout.read().decode()}')
