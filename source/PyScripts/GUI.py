@@ -52,11 +52,13 @@ class tk_main(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "FT_Master-Slave")
-
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
         container = tk.Frame(self, background="bisque", relief=tk.RAISED, borderwidth=5) 
-        container.grid(row=0, column=0)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        container.grid(row=0, column=0, sticky="nsew")
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
         
         #TODO: Add delete_all_local_keys option
         menubar = tk.Menu(container)
@@ -79,7 +81,7 @@ class tk_main(tk.Tk):
         for F in (StartPage,PageMatPlot):
             frame = F(container, self)
             self.frames[F] = frame
-            frame.grid(row=3,column=3, sticky="nsew")             
+            frame.grid(row=0,column=0, sticky="nsew")             
         self.show_frame(StartPage)
 
 
@@ -142,23 +144,14 @@ class StartPage(tk.Frame):
         ent_ip.focus() 
         
         # layout of columns/rows
-        self.columnconfigure(0, weight=1, minsize=75)
-        self.rowconfigure(0, weight=1, minsize=50)
-        
-        frm_nav.columnconfigure(0, weight=1)
-        frm_nav.columnconfigure(1, weight=1)
-        frm_nav.rowconfigure(0, weight=1)
-
-        ssh_conn_frame.columnconfigure(1, weight=1)
-        ssh_conn_frame.rowconfigure(1, weight=1)
-        ssh_status_frame.columnconfigure(0, weight=1)
-        ssh_status_frame.rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1, minsize=450)
+        self.grid_rowconfigure(0, weight=1, minsize=30)
         
         #layout of frames
         frm_nav.grid(row=0, column=0, sticky="ew")
         ssh_conn_frame.grid(row=1, column= 0, sticky="w")
         ssh_status_frame.grid(row=2, column=0, sticky="ew")
-        ssh_output_frame.grid(row=2, column=4, sticky="ns")
+        ssh_output_frame.grid(row=2, column=4, sticky="ew")
         
         #layout of labels
         lbl_user.grid(row=1, column=0, sticky="w")
@@ -177,8 +170,8 @@ class StartPage(tk.Frame):
         self.ent_host.grid(row=5, column=1)
         
         #layout of texts
-        self.txt_status.grid(row=0, column=0)
-        txt_data.grid(row=0, column=0)
+        self.txt_status.grid(row=0, column=0, sticky="ew")
+        txt_data.grid(row=0, column=0, sticky="ew")
 
         #layout of buttons & checkbuttons
         btn_key.grid(row=4, column=2, sticky="w")
