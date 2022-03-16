@@ -9,7 +9,7 @@ target_user = 'retterath-ubuntu-server'
 target_port = 22
 
 def ping_ssh(hostname):
-    response = os.system('ping -c 1 ' + hostname) #UPDATE
+    response = os.system('ping -c 1 ' + hostname) #UPDATE: use python library instead
     if response == 0:
       return "ON"
     return "OFF"
