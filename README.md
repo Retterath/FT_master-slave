@@ -17,11 +17,11 @@ This will make the VM use the same network as the host.
 > the network and can be contacted by other machines on the network as if it were a physical computer on the network.
 
 # Arduino sensor - connection schematic
-![Connection schematic](docs/project/arduino_schematic.png "title")
+![Connection schematic](docs/project/arduino_schematic.png)
 USB connection needs to be hooked up to the interpreter's PC, in order to allow serial transfer.
 
 Buzzer is optional, but is useful for error signaling. 
 
 Contrast may also be hooked up directly to a resistor, but not recommended - if too low load is connected, it may burn the LCD. Reference your LCD manual for more details.
 
-![Data flow](docs/project/Functional%20Flow%20Chart.png "title")
+![Data flow](docs/project/Functional%20Flow%20Chart.png)
