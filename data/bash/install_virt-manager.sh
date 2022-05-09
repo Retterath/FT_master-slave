@@ -19,7 +19,7 @@ ubuntu_server_image_url='http://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-se
 #TODO: Check virtualization support (*must support AMD-V or VT-x)
 egrep -c '(vmx|svm)' /proc/cpuinfo
 file="dependencies.txt"
-pwd
+
 while read dependency separator version
 do
     # Check if line is blank
@@ -68,14 +68,19 @@ pwd
 answer=${1-"y"}
 if [ "$answer" == "y" ]; then
     # Automatic setup
-    groupadd libvirt
+    sudo groupadd libvirt
     #TODO: Change this. "Adding users to the libvirtd group effectively grants them root access."
     #       Try policykit to connect to the libvirtd daemon without asking for root password
     sudo usermod -aG libvirt $USER 
     #
     sudo mkdir -pv -m 777 /kvm/{disk,iso}
-    sudo chown libvirt-qemu:libvirt-qemu kvm
-    sudo wget $ubuntu_desktop_image_url
+    sudo chown -R $USER /kvm
+    cd /kvm/iso
+    if [ -f "$ubuntu_desktop_image_url" ]; then
+        sudo wget $ubuntu_desktop_image_url
+    fi
+    cd $path
+    
     # The name of the VM; os we will install; os-variant (check with osinfo-query os --fields=name,short-id,family);
     # ram in MB; virtual disk where the VM will be saved with QEMU Copy-On-Write v2 format with 10GB size;
     # the VM will be accessed through VNC and will listen on all available network interfaces
@@ -92,7 +97,7 @@ if [ "$answer" == "y" ]; then
     --graphics vnc,listen=0.0.0.0 \
     --noautoconsole \
     --hvm \
-    --cdrom /kvm/iso/ubuntu-20.04.4-live-server-amd64.iso \
+    --cdrom /kvm/iso/ubuntu-20.04.4-desktop-amd64.iso \
     --boot cdrom,hd
 
     echo "yes"
