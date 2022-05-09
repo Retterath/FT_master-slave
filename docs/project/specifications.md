@@ -10,7 +10,7 @@
 
 Description of the visions and goals to be achieved through the use of the system
 
-The Software is meant to connect one user to a server which is connected to several microcontrollers (Master-Slave). The connection is established via SSH and as such uses keys/passwords. 
+The Software is meant to connect one user to a server which is connected to several microcontrollers (Master-Slave). In other words, to enable access to microcontrollers over a server. The connection to the server is established via SSH and as such uses keys/passwords. 
 Each microcontroller is connected to a interpreter. Since not all microcontrollers use the same architecture and programming language the input to the server would be unequal for different microcontrollers.
 The role of an interpreter is to format that unequal data from the microcontroller and to deliver it to the server. In that way we can agree on one convention of formating and delivering data to the server. 
 
