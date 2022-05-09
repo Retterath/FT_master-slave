@@ -1,57 +1,40 @@
----
-layout: default
-title : Woche 6
----
-# Lastenheft 
+# Specifications 
 #####  (Vorlage nach Balzert, Lehrbuch der Softwaretechnik (3 Auflage, Kapitel 20.3))
 
 | Version | Autor | Quelle | Status | Datum | Kommentar |
 | ------- | ----- | ------ | ------ | ----- | --------- |
-|  0.1    |  Name   | Name | in Bearbeitung | 01.01.1970 | |
+|  0.1    |Retterath| none | editing | 09.05.2022 | First description |
 
 
-## 1. Visionen und Ziele
+## 1. Visions and Goals
 
-Beschreibung der Visionen und Ziele, die durch den Einsatz des Systems erreicht werden sollen
+Description of the visions and goals to be achieved through the use of the system
 
-* /LV10/ Vision 1
-* /LV20/ Vision 2
-* /LZ10/ Ziel 1
-* /LZ20/ Ziel 2
+The Software is meant to connect one user to a server which is connected to several microcontrollers (Master-Slave). The connection is established via SSH and as such uses keys/passwords. 
+Each microcontroller is connected to a interpreter. Since not all microcontrollers use the same architecture and programming language the input to the server would be unequal for different microcontrollers.
+The role of an interpreter is to format that unequal data from the microcontroller and to deliver it to the server. In that way we can agree on one convention of formating and delivering data to the server. 
 
-## 2. Rahmenbedingungen
 
-Bechreibung der Anwendungsbereiche und Zielgruppen
+## 2. General conditions
 
-* /LR10/ Anwendungsbereich 1 des Systems 
-* /LR20/ Anwendungsbereich 2 des Systems 
+Description of the areas of application and target groups
 
-## 3. Kontext und &Uuml;berblick
+The area of use of that project is unspecific. This can be used in small projects (e.g. connect microcontrollers at home) or large projects (e.g. measure multiple temperatures inside chambers of industrial areas). 
+
+## 3. Context and Overview
  
-Festlegung der relevanten Systemumgebung (Kontext) und &Uuml;berblick &uuml;ber das System
-
-* /LK10/ Kontext 1 des Systems 
-* /LK20/ Kontext 2 des Systems
-
-## 4. Funktionale Anforderungen 
-
-Falls nat&uuml;rlichsprachliche Anforderungen verwendet werden, sollten Sprachtemplates verwendet werden. gemacht werden. 
+Definition of the relevant system environment (context) and overview of the system
 
 
-* /LF10/ Funktionale Anforderung 1
-* /LF20/ Funktionale Anforderung 2
+## 4. Functional Requirements 
 
+## 5. Quality Requirements
 
-## 5. Qualit&auml;tsanforderungen
-
-| Systemqualit&auml;t  | sehr gut | gut | normal | nicht relevant |
+| System quality  | excellent | good | normal | not relevant |
 | -------------------  | -------- | --- | ------ | -------------- | 
-| Funktionalit&auml;t  |          |     |   x    |                 |
-| Zuverl&auml;ssigkeit |          |     |   x    |                 |
-| Benutzbarkeit        |          |     |   x    |                |
-| Effizienz            |          |     |   x    |                 |
-| Wartbarkeit          |          |     |   x    |                 |
-| Portabilit&auml;t    |          |     |   x    |                 |
-
-* /LQB10/ Qualit&auml;tsanforderung zur Benutzbarkeit des Systems
-* /LQE10/ Qualit&auml;tsanforderung zur Effizienz des Systems
+| Functionality        |     x    |     |        |                |
+| Reliability          |          |     |        |                |
+| Usability            |     x    |     |        |                |
+| Efficiency           |          |     |   x    |                |
+| Maintainability      |          |     |   x    |                |
+| Portability          |     x    |     |        |                |
